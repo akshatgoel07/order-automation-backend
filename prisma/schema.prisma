@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Item {
+  Item_id        Int        @id @default(autoincrement())
+  Item_name      String
+  Item_price     Int
+  fk_business_id Int
+  Business_id    Business   @relation(fields: [fk_business_id], references: [Business_id])
+  Quantity       Quantity[]
+
+  @@unique([Item_name, Item_price])
+}
+
+enum Food_Type {
+  Food
+  Drink
+}
+
+model Table {
+  Table_id       Int      @id @default(autoincrement())
+  Table_number   String
+  fk_business_id Int
+  Orders         Orders[]
+  Business_id    Business @relation(fields: [fk_business_id], references: [Business_id])
+
+  @@unique([Table_number, fk_business_id])
+}
+
+model Business {
+  Business_id Int @id @default(autoincrement())
+
+  Business_email String
+  password       String
+  Table          Table[]
+  Item           Item[]
+
+  @@unique([Business_email])
+}
+
+enum Order_Status {
+  Pending
+  Delivered
+}
+
+model Orders {
+  Order_id     Int          @id @default(autoincrement())
+  Order_status Order_Status
+  fk_table_id  Int
+  Table_id     Table        @relation(fields: [fk_table_id], references: [Table_id])
+  Quantity     Quantity[]
+}
+
+model Quantity {
+  Quantity_id Int    @id @default(autoincrement())
+  Quantity    Int
+  fk_item_id  Int
+  fk_order_id Int
+  Item_id     Item   @relation(fields: [fk_item_id], references: [Item_id])
+  Order_id    Orders @relation(fields: [fk_order_id], references: [Order_id])
+}
